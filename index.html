@@ -4,44 +4,254 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Form Input Data</title>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
     <style>
-        /* Tambahkan gaya yang kamu inginkan di sini */
         body {
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
         }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-top: 20px;
+        }
+
         .container {
-            max-width: 500px;
-            margin: auto;
+            max-width: 800px;
+            margin: 20px auto;
+            background: #fff;
             padding: 20px;
-            background: #f4f4f9;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        input, select, button {
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        input, select {
             width: 100%;
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 5px;
+            padding: 8px;
+            margin-top: 5px;
             border: 1px solid #ccc;
+            border-radius: 4px;
         }
+
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        button[type="button"] {
+            background-color: #008CBA;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
         }
-        th, td {
-            padding: 10px;
+
+        table th, table td {
             border: 1px solid #ddd;
+            padding: 8px;
             text-align: center;
         }
+
+        table th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .actions button {
+            margin: 0 5px;
+            padding: 5px 10px;
+        }
+
+        .actions svg {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .download-button {
+            background-color: #FFA500;
+            color: white;
+        }
+
+        .back-button {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                padding: 15px;
+            }
+
+            table th, table td {
+                padding: 6px;
+            }
+
+            button {
+                padding: 8px 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            button {
+                padding: 7px 12px;
+                font-size: 14px;
+            }
+
+            input, select {
+                padding: 6px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 18px;
+            }
+
+            input, select {
+                padding: 5px;
+                font-size: 14px;
+            }
+
+            button {
+                padding: 5px 10px;
+                font-size: 12px;
+            }
+
+            table th, table td {
+                padding: 5px;
+                font-size: 12px;
+            }
+        }
+
     </style>
+    <script>
+        let data = [];
+
+        function addData() {
+            const name = document.getElementById("name").value;
+            const kelas = document.getElementById("kelas").value;
+            const gender = document.getElementById("gender").value;
+            const phone = document.getElementById("phone").value;
+
+            if (name && kelas && gender && phone) {
+                data.push({ name, kelas, gender, phone });
+                alert("Data berhasil disimpan!");
+                clearForm();
+                showPage('table-page');
+                displayData();
+            } else {
+                alert("Semua kolom harus diisi!");
+            }
+        }
+
+        function displayData() {
+            const tableBody = document.getElementById("data-table-body");
+            tableBody.innerHTML = "";
+
+            data.forEach((item, index) => {
+                tableBody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${item.name}</td>
+                        <td>${item.kelas}</td>
+                        <td>${item.gender}</td>
+                        <td>${item.phone}</td>
+                        <td class="actions">
+                            <svg onclick="editData(${index})" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 3.487a2.25 2.25 0 013.182 3.182L7.068 19.646a4.5 4.5 0 01-1.691 1.08l-3.28 1.094 1.094-3.28a4.5 4.5 0 011.08-1.691l12.591-12.592z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6.75l6.75 6.75" />
+                            </svg>
+                            <svg onclick="deleteData(${index})" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function editData(index) {
+            const item = data[index];
+            document.getElementById("name").value = item.name;
+            document.getElementById("kelas").value = item.kelas;
+            document.getElementById("gender").value = item.gender;
+            document.getElementById("phone").value = item.phone;
+
+            deleteData(index);
+            showPage('input-page');
+        }
+
+        function deleteData(index) {
+            data.splice(index, 1);
+            displayData();
+        }
+
+        function clearForm() {
+            document.getElementById("name").value = "";
+            document.getElementById("kelas").value = "";
+            document.getElementById("gender").value = "";
+            document.getElementById("phone").value = "";
+        }
+
+        function downloadExcel() {
+            let csvContent = "data:text/csv;charset=utf-8,No,Name,Kelas,Gender,Phone\n";
+            data.forEach((item, index) => {
+                csvContent += `${index + 1},${item.name},${item.kelas},${item.gender},${item.phone}\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "data.csv");
+            document.body.appendChild(link);
+
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function showPage(pageId) {
+            document.getElementById("input-page").classList.add("hidden");
+            document.getElementById("table-page").classList.add("hidden");
+            document.getElementById(pageId).classList.remove("hidden");
+        }
+    </script>
 </head>
-<body>
-    <div class="container">
+<body onload="showPage('input-page')">
+    <div id="input-page" class="container hidden">
         <h1>Form Input Data</h1>
-        <form id="dataForm">
+        <form onsubmit="event.preventDefault(); addData();">
             <label for="name">Nama:</label>
             <input type="text" id="name" required>
 
@@ -59,78 +269,29 @@
             <input type="text" id="phone" required>
 
             <button type="submit">Simpan Data</button>
+            <button type="button" onclick="showPage('table-page'); displayData();">Lihat Daftar Data</button>
         </form>
-        <h2>Daftar Data</h2>
+    </div>
+
+    <div id="table-page" class="container hidden">
+        <h1>Daftar Data</h1>
         <table>
             <thead>
                 <tr>
+                    <th>No</th>
                     <th>Nama</th>
                     <th>Kelas</th>
                     <th>Jenis Kelamin</th>
                     <th>Nomor HP</th>
+                    <th>Aksi</th>
                 </tr>
             </thead>
-            <tbody id="dataTable"></tbody>
+            <tbody id="data-table-body">
+                <!-- Data akan ditampilkan di sini -->
+            </tbody>
         </table>
+        <button class="download-button" onclick="downloadExcel()">Download Excel</button>
+        <button class="back-button" onclick="showPage('input-page')">Kembali ke Input Data</button>
     </div>
-
-    <script>
-        // Konfigurasi Firebase
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-
-        // Inisialisasi Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        // Referensi ke database
-        const dataRef = firebase.database().ref("data");
-
-        // Form Submit
-        document.getElementById("dataForm").addEventListener("submit", function (e) {
-            e.preventDefault();
-
-            // Ambil data dari form
-            const name = document.getElementById("name").value;
-            const kelas = document.getElementById("kelas").value;
-            const gender = document.getElementById("gender").value;
-            const phone = document.getElementById("phone").value;
-
-            // Simpan ke database
-            dataRef.push({
-                name: name,
-                kelas: kelas,
-                gender: gender,
-                phone: phone
-            });
-
-            // Bersihkan form
-            e.target.reset();
-        });
-
-        // Tampilkan data di tabel
-        dataRef.on("value", function (snapshot) {
-            const tableBody = document.getElementById("dataTable");
-            tableBody.innerHTML = ""; // Kosongkan tabel sebelum mengisi
-
-            snapshot.forEach(function (childSnapshot) {
-                const data = childSnapshot.val();
-                const row = `<tr>
-                    <td>${data.name}</td>
-                    <td>${data.kelas}</td>
-                    <td>${data.gender}</td>
-                    <td>${data.phone}</td>
-                </tr>`;
-                tableBody.innerHTML += row;
-            });
-        });
-    </script>
 </body>
 </html>
