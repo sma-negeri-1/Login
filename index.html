@@ -1,29 +1,136 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Halaman dengan Background Sound</title>
+    <title>Form Input Data</title>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
     <style>
+        /* Tambahkan gaya yang kamu inginkan di sini */
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(to bottom, #87CEEB, #f0f8ff);
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #333;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            padding: 20px;
+            background: #f4f4f9;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        input, select, button {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <h1>Selamat Datang di Halaman dengan Background Sound</h1>
-    <!-- Elemen audio untuk suara latar -->
-    <audio autoplay loop hidden>
-        <source src="Tua tua keladi ( Lirik ).mp3" type="audio/mpeg">
-        Browser Anda tidak mendukung elemen audio.
-    </audio>
+    <div class="container">
+        <h1>Form Input Data</h1>
+        <form id="dataForm">
+            <label for="name">Nama:</label>
+            <input type="text" id="name" required>
+
+            <label for="kelas">Kelas:</label>
+            <input type="text" id="kelas" required>
+
+            <label for="gender">Jenis Kelamin:</label>
+            <select id="gender" required>
+                <option value="">Pilih</option>
+                <option value="Laki-laki">Laki-laki</option>
+                <option value="Perempuan">Perempuan</option>
+            </select>
+
+            <label for="phone">Nomor HP:</label>
+            <input type="text" id="phone" required>
+
+            <button type="submit">Simpan Data</button>
+        </form>
+        <h2>Daftar Data</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nama</th>
+                    <th>Kelas</th>
+                    <th>Jenis Kelamin</th>
+                    <th>Nomor HP</th>
+                </tr>
+            </thead>
+            <tbody id="dataTable"></tbody>
+        </table>
+    </div>
+
+    <script>
+        // Konfigurasi Firebase
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Inisialisasi Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // Referensi ke database
+        const dataRef = firebase.database().ref("data");
+
+        // Form Submit
+        document.getElementById("dataForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            // Ambil data dari form
+            const name = document.getElementById("name").value;
+            const kelas = document.getElementById("kelas").value;
+            const gender = document.getElementById("gender").value;
+            const phone = document.getElementById("phone").value;
+
+            // Simpan ke database
+            dataRef.push({
+                name: name,
+                kelas: kelas,
+                gender: gender,
+                phone: phone
+            });
+
+            // Bersihkan form
+            e.target.reset();
+        });
+
+        // Tampilkan data di tabel
+        dataRef.on("value", function (snapshot) {
+            const tableBody = document.getElementById("dataTable");
+            tableBody.innerHTML = ""; // Kosongkan tabel sebelum mengisi
+
+            snapshot.forEach(function (childSnapshot) {
+                const data = childSnapshot.val();
+                const row = `<tr>
+                    <td>${data.name}</td>
+                    <td>${data.kelas}</td>
+                    <td>${data.gender}</td>
+                    <td>${data.phone}</td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        });
+    </script>
 </body>
 </html>
